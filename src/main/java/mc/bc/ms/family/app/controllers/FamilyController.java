@@ -36,5 +36,15 @@ public class FamilyController {
 	public Flux<Family> listInstituteTeacher(@PathVariable String institute) {
 		return famServ.findAllPerson(institute, "Teacher");
 	}
+	
+	@GetMapping("/students/names/{names}/{institute}")
+	public Flux<Person> listNamesStudent(@PathVariable String names, @PathVariable String institute) {
+		return famServ.findNames(names, "Student", institute);
+	}
+
+	@GetMapping("/teachers/names/{names}/{institute}")
+	public Flux<Person> listNamesTeacher(@PathVariable String names, @PathVariable String institute) {
+		return famServ.findNames(names, "Teacher", institute);
+	}
 
 }

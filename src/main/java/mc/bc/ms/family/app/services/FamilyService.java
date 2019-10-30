@@ -13,5 +13,5 @@ public interface FamilyService {
 	
 	public Flux<Family> findAllPerson(String institute, String type);
 
-	
+	public Flux<Person> findNames(String names, String type, String institute);
 }

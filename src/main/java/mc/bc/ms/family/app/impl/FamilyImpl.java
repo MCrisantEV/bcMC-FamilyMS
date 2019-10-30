@@ -3,6 +3,7 @@ package mc.bc.ms.family.app.impl;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +141,60 @@ public class FamilyImpl implements FamilyService{
 	@Override
 	public Flux<Family> findAllPerson(String institute, String type) {
 		return famRep.findByInstituteAndType(institute, type);
+	}
+
+	@Override
+	public Flux<Person> findNames(String names, String type, String institute) {
+		
+		return client.get().uri("/names/{names}", Collections.singletonMap("names", names))
+		.accept(APPLICATION_JSON_UTF8)
+		.retrieve()
+		.bodyToFlux(Person.class).flatMap(gp -> {
+			return famRep.findById(gp.getId()).map(gf -> {
+				gp.setInstitute(gf.getInstitute());
+				gp.setRelationship(gf.getType());
+				
+				List<Person> listPerson = new ArrayList<>();
+				Flux.fromIterable(gf.getFamilyMembers()).map(lgf -> {
+					
+					return client.get().uri("/{id}", Collections.singletonMap("id", lgf.getId()))
+						.accept(APPLICATION_JSON_UTF8)
+						.retrieve()
+						.bodyToMono(Person.class).doOnNext(m -> {
+							Person p = new Person();
+							p.setId(m.getId());
+							p.setRelationship(m.getRelationship());
+							p.setNames(m.getNames());
+							listPerson.add(p);
+							System.out.println(m.getNames());
+						});
+				}).subscribe();
+				
+//				gf.getFamilyMembers().forEach(fr -> {
+//					Person p = new Person();
+//					p.setId(fr.getId());
+//					p.setRelationship(fr.getRelationship());
+//					
+//					client.get().uri("/{id}", Collections.singletonMap("id", fr.getId()))
+//					.accept(APPLICATION_JSON_UTF8)
+//					.retrieve()
+//					.bodyToMono(Person.class).doOnNext(glp -> {
+//						
+//						
+//						System.out.println(glp.getNames());
+//						
+////						return p;
+//					}).subscribe();
+//					listPerson.add(p);
+//					
+//				});
+				gp.setFamilyMembers(listPerson);
+//				gp.setFamilyMembers(gf.getFamilyMembers());
+				return gp;
+			});
+//			return null;
+		});
+
 	}
 
 }
