@@ -9,6 +9,6 @@ public class AppConfig {
 	
 	@Bean
 	public WebClient createWebClient() {
-		return WebClient.create("http://localhost");
+		return WebClient.create("http://localhost:8004/persons");
 	}
 }
