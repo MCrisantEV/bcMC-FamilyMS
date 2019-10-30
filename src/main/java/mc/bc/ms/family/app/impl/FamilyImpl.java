@@ -136,4 +136,10 @@ public class FamilyImpl implements FamilyService{
 		});
 	}
 
+	
+	@Override
+	public Flux<Family> findAllPerson(String institute, String type) {
+		return famRep.findByInstituteAndType(institute, type);
+	}
+
 }

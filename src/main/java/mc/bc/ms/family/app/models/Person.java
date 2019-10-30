@@ -28,7 +28,7 @@ public class Person {
 	private String typeDoc;
 	
 	private String institute;
-//	private String type;
+
 	@NotBlank
 	private String relationship;
 	@Valid
