@@ -9,3 +9,6 @@ El Microservicio Institute, contiene varias APIs las cuales devuelven un archivo
 - API deleteStudent / Teacher
 - APi findDatesStudent / Teacher
 - APi findIdStudent / Teacher
+
+Configuracion
+- Config Server
