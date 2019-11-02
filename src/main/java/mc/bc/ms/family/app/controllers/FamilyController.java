@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import mc.bc.ms.family.app.models.Family;
 import mc.bc.ms.family.app.models.Person;
 import mc.bc.ms.family.app.services.FamilyService;
 import reactor.core.publisher.Flux;
@@ -28,12 +28,12 @@ public class FamilyController {
 	}
 
 	@GetMapping("/students/{institute}")
-	public Flux<Family> listInstituteStudent(@PathVariable String institute) {
+	public Flux<Person> listInstituteStudent(@PathVariable String institute) {
 		return famServ.findAllPerson(institute, "Student");
 	}
 
 	@GetMapping("/teachers/{institute}")
-	public Flux<Family> listInstituteTeacher(@PathVariable String institute) {
+	public Flux<Person> listInstituteTeacher(@PathVariable String institute) {
 		return famServ.findAllPerson(institute, "Teacher");
 	}
 	
@@ -55,6 +55,21 @@ public class FamilyController {
 	@GetMapping("/teachers/dates/{firstDate}/{lastDate}/{institute}")
 	public Flux<Person> listDatesTeacher(@PathVariable String firstDate, @PathVariable String lastDate, @PathVariable String institute) {
 		return famServ.findDateRanger(firstDate, lastDate, "Teacher", institute);
+	}
+	
+	@PutMapping
+	public Mono<Map<String, Object>> editPerson(@RequestBody Person person) {
+		return famServ.updatePerson(person);
+	}
+	
+	@GetMapping("/students/dni/{dni}/{institute}")
+	public Flux<Person> listDniStudent(@PathVariable String dni, @PathVariable String institute) {
+		return famServ.findIdPerson(dni, institute, "Student");
+	}
+
+	@GetMapping("/teachers/dni/{dni}/{institute}")
+	public Flux<Person> listDniTeacher(@PathVariable String dni, @PathVariable String institute) {
+		return famServ.findIdPerson(dni, institute, "Teacher");
 	}
 
 }

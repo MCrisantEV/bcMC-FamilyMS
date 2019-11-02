@@ -1,9 +1,9 @@
-# bcMC-InstituteMS
+# bcMC-FamilyMS
 
-El Microservicio Institute, contiene varias APIs las cuales devuelven un archivo json con la información.
+El Microservicio Family, contiene varias APIs las cuales devuelven un archivo json con la información.
 
 - API saveStudent / Teacher
-- API findAllTeacher / Teacher
+- API findAllStudent / Teacher
 - APi findNameStudent / Teacher
 - API updateStudent / Teacher
 - API deleteStudent / Teacher
