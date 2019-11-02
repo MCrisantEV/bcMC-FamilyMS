@@ -8,7 +8,5 @@ import reactor.core.publisher.Flux;
 public interface FamilyRepository extends ReactiveMongoRepository<Family, String>{
 	
 	public Flux<Family> findByInstituteAndType(String institute, String type);
-	
-//	public Flux<>
 
 }

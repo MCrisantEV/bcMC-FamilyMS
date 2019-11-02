@@ -196,4 +196,57 @@ public class FamilyImpl implements FamilyService{
 		});
 	}
 
+
+	@Override
+	public Flux<Person> findDateRanger(String firstDate, String lastDate, String type, String institute) {
+		return client.get().uri("/dates/"+firstDate+"/"+lastDate)
+				.accept(APPLICATION_JSON_UTF8)
+				.retrieve()
+				.bodyToFlux(Person.class).flatMap(gp -> {
+					return famRep.findById(gp.getId()).map(gf -> {
+						gp.setInstitute(gf.getInstitute());
+						gp.setRelationship(gf.getType());
+						List<Person> list = new ArrayList<>();
+						gf.getFamilyMembers().forEach(fr -> {
+							Person p = new Person();
+							p.setId(fr.getId());
+							p.setRelationship(fr.getRelationship());
+							list.add(p);
+						});
+						gp.setFamilyMembers(list);
+						return gp;
+					});
+				})
+				.filter(fil -> fil.getRelationship().equals(type))
+				.filter(fil -> fil.getInstitute().equals(institute))
+				.flatMap(m -> {
+					if(m.getFamilyMembers().isEmpty()) {
+						return Flux.just(m);
+					}else {
+						return Flux.fromIterable(m.getFamilyMembers()).flatMap(f -> {
+							
+							return client.get().uri("/{id}", Collections.singletonMap("id", f.getId()))
+							.accept(APPLICATION_JSON_UTF8)
+							.retrieve()
+							.bodyToMono(Person.class)
+							.flatMap(gp -> {
+								f.setNames(gp.getNames());
+								f.setLastNames(gp.getLastNames());
+								f.setGender(gp.getGender());
+								f.setDateBirth(gp.getDateBirth());
+								f.setTypeDoc(gp.getTypeDoc());
+								return Mono.just(f);
+							});
+						}).collectList().map(cl -> {
+							List<Person> lp = new ArrayList<>();
+							cl.forEach(fr -> {
+								lp.add(fr);
+							});
+							m.setFamilyMembers(lp);
+							return m;
+						});
+					}
+				});
+	}
+
 }

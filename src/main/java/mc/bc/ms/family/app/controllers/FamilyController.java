@@ -46,5 +46,15 @@ public class FamilyController {
 	public Flux<Person> listNamesTeacher(@PathVariable String names, @PathVariable String institute) {
 		return famServ.findNames(names, "Teacher", institute);
 	}
+	
+	@GetMapping("/students/dates/{firstDate}/{lastDate}/{institute}")
+	public Flux<Person> listDatesStudent(@PathVariable String firstDate, @PathVariable String lastDate, @PathVariable String institute) {
+		return famServ.findDateRanger(firstDate, lastDate, "Student", institute);
+	}
+	
+	@GetMapping("/teachers/dates/{firstDate}/{lastDate}/{institute}")
+	public Flux<Person> listDatesTeacher(@PathVariable String firstDate, @PathVariable String lastDate, @PathVariable String institute) {
+		return famServ.findDateRanger(firstDate, lastDate, "Teacher", institute);
+	}
 
 }
