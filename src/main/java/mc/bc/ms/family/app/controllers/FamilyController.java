@@ -3,6 +3,7 @@ package mc.bc.ms.family.app.controllers;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,6 +71,16 @@ public class FamilyController {
 	@GetMapping("/teachers/dni/{dni}/{institute}")
 	public Flux<Person> listDniTeacher(@PathVariable String dni, @PathVariable String institute) {
 		return famServ.findIdPerson(dni, institute, "Teacher");
+	}
+	
+	@DeleteMapping("/students/{dni}/{institute}")
+	public Mono<Map<String, Object>> removeStudent(@PathVariable String dni, @PathVariable String institute) {
+		return famServ.deleteStudent(dni, institute);
+	}
+	
+	@DeleteMapping("/teachers/{dni}/{institute}")
+	public Mono<Map<String, Object>> removeTeacher(@PathVariable String dni, @PathVariable String institute) {
+		return famServ.deleteTeacher(dni, institute);
 	}
 
 }

@@ -3,12 +3,12 @@ package mc.bc.ms.family.app.impl;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -28,10 +28,21 @@ import reactor.core.publisher.Mono;
 public class FamilyImpl implements FamilyService {
 
 	@Autowired
-	private FamilyRepository famRep;
+	@Qualifier("person")
+	WebClient wcPerson;
 
 	@Autowired
-	private WebClient client;
+	@Qualifier("inscription")
+	WebClient wcInscription;
+	
+	@Autowired
+	@Qualifier("course")
+	WebClient wcCourse;
+	
+	
+
+	@Autowired
+	private FamilyRepository famRep;
 
 	@Autowired
 	private Validator validator;
@@ -85,6 +96,18 @@ public class FamilyImpl implements FamilyService {
 	@Override
 	public Flux<Person> findIdPerson(String id, String institute, String type) {
 		return findFamily(famRep.findByIdLikeAndInstituteAndType(id, institute, type));
+	}
+
+	@Override
+	public Mono<Map<String, Object>> deleteStudent(String id, String institute) {
+		String url = "/students/" + id + "/" + institute;
+		return deletePerson(wcInscription, url, 1, id, institute);
+	}
+	
+	@Override
+	public Mono<Map<String, Object>> deleteTeacher(String id, String institute) {
+		String url = "/teachers/" + id + "/" + institute;
+		return deletePerson(wcCourse, url, 2, id, institute);
 	}
 
 	private Mono<Map<String, Object>> errors(Person person) {
@@ -169,8 +192,8 @@ public class FamilyImpl implements FamilyService {
 					fam.setFamilyMembers(lismemb);
 				}).subscribe();
 
-				return client.post().accept(APPLICATION_JSON_UTF8).contentType(APPLICATION_JSON_UTF8).syncBody(listPers)
-						.retrieve().bodyToMono(Member.class).map(rq -> {
+				return wcPerson.post().accept(APPLICATION_JSON_UTF8).contentType(APPLICATION_JSON_UTF8)
+						.syncBody(listPers).retrieve().bodyToMono(Member.class).map(rq -> {
 							int reg = Integer.parseInt(rq.getId());
 							if (reg == 0) {
 								String ms = (action == 1) ? "registar" : "actualizar";
@@ -187,7 +210,7 @@ public class FamilyImpl implements FamilyService {
 	}
 
 	private Flux<Person> findPerson(String url, String type, String institute) {
-		return client.get().uri(url).accept(APPLICATION_JSON_UTF8).retrieve().bodyToFlux(Person.class).flatMap(gp -> {
+		return wcPerson.get().uri(url).accept(APPLICATION_JSON_UTF8).retrieve().bodyToFlux(Person.class).flatMap(gp -> {
 			return famRep.findById(gp.getId()).map(gf -> {
 				gp.setInstitute(gf.getInstitute());
 				gp.setRelationship(gf.getType());
@@ -207,8 +230,8 @@ public class FamilyImpl implements FamilyService {
 
 	private Flux<Person> findFamily(Flux<Family> family) {
 		return family.flatMap(fam -> {
-			return client.get().uri("/{id}", Collections.singletonMap("id", fam.getId())).accept(APPLICATION_JSON_UTF8)
-					.retrieve().bodyToMono(Person.class).map(gp -> {
+			return wcPerson.get().uri("/" + fam.getId()).accept(APPLICATION_JSON_UTF8).retrieve()
+					.bodyToMono(Person.class).map(gp -> {
 						Person per = new Person();
 						per.setId(gp.getId());
 						per.setNames(gp.getNames());
@@ -239,8 +262,8 @@ public class FamilyImpl implements FamilyService {
 				return Mono.just(per);
 			} else {
 				return Flux.fromIterable(per.getFamilyMembers()).flatMap(memb -> {
-					return client.get().uri("/"+memb.getId())
-							.accept(APPLICATION_JSON_UTF8).retrieve().bodyToMono(Person.class).map(gper -> {
+					return wcPerson.get().uri("/" + memb.getId()).accept(APPLICATION_JSON_UTF8).retrieve()
+							.bodyToMono(Person.class).map(gper -> {
 								memb.setNames(gper.getNames());
 								memb.setLastNames(gper.getLastNames());
 								memb.setGender(gper.getGender());
@@ -255,5 +278,26 @@ public class FamilyImpl implements FamilyService {
 			}
 		});
 	}
-
+	
+	private Mono<Map<String, Object>> deletePerson(WebClient wc, String url, int type, String id, String institute) {
+		Map<String, Object> respuesta = new HashMap<String, Object>();
+		String person = (type == 1) ? "estudiante" : "profesor";
+		
+		return wc.get().uri(url).accept(APPLICATION_JSON_UTF8).retrieve().bodyToFlux(Member.class)
+				.collectList().flatMap(list -> {
+					if (list.size() > 0) {
+						respuesta.put("Error", "No se puede eliminar, el "+person+" tiene cursos asignados");
+						return Mono.just(respuesta);
+					} else {
+						return famRep.findByIdAndInstitute(id, institute).map(fam -> {
+							famRep.delete(fam).subscribe();
+							respuesta.put("Mensaje", "Se elimino con exito al "+person);
+							return respuesta;
+						}).switchIfEmpty(Mono.just("").map(m -> {
+							respuesta.put("Error", "No existe el "+person);
+							return respuesta;
+						}));
+					}
+				});
+	}
 }

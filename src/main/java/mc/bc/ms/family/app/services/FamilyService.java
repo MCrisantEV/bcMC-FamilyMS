@@ -19,4 +19,8 @@ public interface FamilyService {
 	public Mono<Map<String, Object>> updatePerson(Person person);
 	
 	public Flux<Person> findIdPerson(String id, String institute, String type);
+	
+	public Mono<Map<String, Object>> deleteStudent(String id, String institute);
+	
+	public Mono<Map<String, Object>> deleteTeacher(String id, String institute);
 }
