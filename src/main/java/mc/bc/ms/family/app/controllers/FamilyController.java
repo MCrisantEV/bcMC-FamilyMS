@@ -82,5 +82,10 @@ public class FamilyController {
 	public Mono<Map<String, Object>> removeTeacher(@PathVariable String dni, @PathVariable String institute) {
 		return famServ.deleteTeacher(dni, institute);
 	}
+	
+	@GetMapping("/members/{institute}")
+	public Flux<Person> listMemberInstitute(@PathVariable String institute) {
+		return famServ.findAllInstitute(institute);
+	}
 
 }

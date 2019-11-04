@@ -7,8 +7,9 @@ El Microservicio Family, contiene varias APIs las cuales devuelven un archivo js
 - APi findNameStudent / Teacher
 - API updateStudent / Teacher
 - API deleteStudent / Teacher
-- APi findDatesStudent / Teacher
-- APi findIdStudent / Teacher
+- API findDatesStudent / Teacher
+- API findIdStudent / Teacher
+- API findFamilyMemberInstitute
 
 Configuracion
 - Config Server

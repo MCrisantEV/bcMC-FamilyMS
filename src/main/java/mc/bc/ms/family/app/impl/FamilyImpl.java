@@ -109,6 +109,30 @@ public class FamilyImpl implements FamilyService {
 		String url = "/teachers/" + id + "/" + institute;
 		return deletePerson(wcCourse, url, 2, id, institute);
 	}
+	
+	@Override
+	public Flux<Person> findAllInstitute(String institute) {
+		return famRep.findByInstitute(institute).flatMap(fam -> {
+			
+			return Flux.fromIterable(fam.getFamilyMembers()).flatMap(mem -> {
+				return wcPerson.get().uri("/" + mem.getId()).accept(APPLICATION_JSON_UTF8).retrieve()
+				.bodyToMono(Person.class).map(gper -> {
+					Person p = new Person();
+					p.setId(mem.getId());
+					p.setInstitute(institute);
+					p.setRelationship(mem.getRelationship());
+					
+					p.setNames(gper.getNames());
+					p.setLastNames(gper.getLastNames());
+					p.setGender(gper.getGender());
+					p.setDateBirth(gper.getDateBirth());
+					p.setTypeDoc(gper.getTypeDoc());
+					
+					return p;
+				});
+			});
+		});
+	}
 
 	private Mono<Map<String, Object>> errors(Person person) {
 		Map<String, Object> respuesta = new HashMap<String, Object>();
@@ -300,4 +324,5 @@ public class FamilyImpl implements FamilyService {
 					}
 				});
 	}
+
 }

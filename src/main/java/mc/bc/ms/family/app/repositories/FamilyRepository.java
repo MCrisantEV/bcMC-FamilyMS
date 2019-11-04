@@ -13,5 +13,7 @@ public interface FamilyRepository extends ReactiveMongoRepository<Family, String
 	public Flux<Family> findByIdLikeAndInstituteAndType(String id, String institute, String type);
 	
 	public Mono<Family> findByIdAndInstitute(String id, String institute);
+	
+	public Flux<Family> findByInstitute(String institute);
 
 }
