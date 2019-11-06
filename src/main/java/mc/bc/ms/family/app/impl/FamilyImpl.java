@@ -120,8 +120,7 @@ public class FamilyImpl implements FamilyService {
 					Person p = new Person();
 					p.setId(mem.getId());
 					p.setInstitute(institute);
-					p.setRelationship(mem.getRelationship());
-					
+					p.setRelationship(fam.getType());
 					p.setNames(gper.getNames());
 					p.setLastNames(gper.getLastNames());
 					p.setGender(gper.getGender());
